@@ -6,7 +6,7 @@ from typing import Literal, Optional, TypedDict
 # location: 추출된 위치 정보
 # forecast: 가져온 날씨 예보 정보
 class WeatherState(TypedDict):
-    query: str
+    query: Optional[str]
     location: Optional[str]
     forecast: Optional[str]
 
@@ -35,12 +35,17 @@ def fetch_weather_data(location: str) -> str:
     return weather_data.get(location, "Weather data not available")
 
 def generate_location_clarification(location: str) -> str:
-    return f"Could you please provide more details about the location '{location}'?"
+    print(f"Could you please provide more details about the location '{location}'?")
+    return location
 
 def format_weather_response(location: str, forecast: str) -> str:
     return f"The weather in {location} is: {forecast}"
 
 # 2. 노드 정의
+def get_user_input_query(state: WeatherState):
+    user_input = input("your query:")
+    return {"query": user_input}
+
 def parse_query(state: WeatherState):
     location = extract_location(state["query"])
     return {"location": location}
@@ -50,8 +55,8 @@ def get_forecast(state: WeatherState):
     return {"forecast": forecast}
 
 def clarify_location(state: WeatherState):
-    clarification = generate_location_clarification(state["location"])
-    return {"query": clarification}
+    generate_location_clarification(state["location"])
+    return state
 
 def generate_response(state: WeatherState):
     response = format_weather_response(state["location"], state["forecast"])
@@ -66,27 +71,38 @@ def check_location(state: WeatherState) -> Literal["valid", "invalid", "ambiguou
     else:
         return "valid"
 
+# 그래프 구성
 graph = StateGraph(WeatherState)
+# 그래프를 구성할 node 정의
+graph.add_node("get_user_input_query", get_user_input_query)
 graph.add_node("parse_query", parse_query)
 graph.add_node("get_forecast", get_forecast)
 graph.add_node("clarify_location", clarify_location)
 graph.add_node("generate_response", generate_response)
 
-graph.add_edge(START, "parse_query")
+# 구성된 node 들의 관계를 정의
+graph.add_edge(START, "get_user_input_query")
+graph.add_edge("get_user_input_query", "parse_query")
 graph.add_conditional_edges(
-    "parse_query",
-    check_location,
+    "parse_query", # parse_query node 에서
+    check_location, # 해당 로직을 실행시켜서
+    # 나온 결과가 key 들과 같을 때, value 의 로직을 실행한다.
     {
         "ambiguous": "clarify_location",
         "valid": "get_forecast",
         "invalid": END
     }
 )
-graph.add_edge("clarify_location", "parse_query")
+graph.add_edge("clarify_location", "get_user_input_query")
 graph.add_edge("get_forecast", "generate_response")
 graph.add_edge("generate_response", END)
 
 app = graph.compile()
 
-result = app.invoke({'query': 'where is in To'})
+# result = app.invoke({'query': 'where is in To'})
+result = app.invoke({}) # langgraph 실행
+# your query:in tj
+# Could you please provide more details about the location 'tj'?
+# your query:it is in Tokyo
+# {'query': 'it is in Tokyo', 'location': 'Tokyo', 'forecast': 'Cloudy, 20°C'}
 print(result)
