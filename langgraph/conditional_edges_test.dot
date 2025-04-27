@@ -1,0 +1,19 @@
+digraph {
+    start [label="START" style="rounded" shape="ellipse"]
+    get_user_input [label="get_user_input_query" style="rounded" shape="rect"]
+    parse_query [label="parse_query" style="rounded" shape="rect"]
+    get_forecast [label="get_forecast" style="rounded" shape="rect"]
+    clarify [label="clarify_location", style="rounded" shape="rect"]
+    generate_response [label="generate_response", style="rounded" shape="rect"]
+    end [label="END" style="rounded" shape="ellipse"]
+
+    start -> get_user_input
+    get_user_input -> parse_query
+    parse_query -> clarify [label="ambiguous"]
+    parse_query -> get_forecast [label="valid"]
+    parse_query -> end [label="invalid"]
+    clarify -> get_user_input
+    get_forecast -> generate_response
+    generate_response -> end
+}
+

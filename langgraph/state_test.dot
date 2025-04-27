@@ -1,0 +1,9 @@
+digraph {
+    s [label="START" style="rounded" shape="ellipse"]
+    o [label="increment" style="rounded" shape="rect"]
+    p [label="END" style="rounded" shape="ellipse"]
+
+    s -> o
+	o -> p
+}
+
