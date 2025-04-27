@@ -18,6 +18,11 @@ def increment(state):
 graph.add_node("increment", increment)
 
 # START에서 'increment' 노드로 엣지 추가
+# 공부 자료 : https://wikidocs.net/262302
+# edge 는 node 간의 연결을 정의
+# - 실행 순서 정의: 엣지는 노드들이 어떤 순서로 실행될지 결정합니다.
+# - 흐름 제어: 조건부 엣지를 사용하면 특정 조건에 따라 다른 노드로 이동할 수 있습니다.
+# - 상태 전달: 한 노드에서 다음 노드로 상태를 전달하는 통로 역할을 합니다.
 graph.add_edge(START, "increment")
 
 # 'increment' 노드에서 END로 엣지 추가
