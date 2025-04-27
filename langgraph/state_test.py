@@ -7,7 +7,7 @@ class MyState(TypedDict):
     counter: int
 
 # StateGraph 인스턴스 생성
-graph = StateGraph(MyState)
+graph = StateGraph(MyState) # MyState : 그래프가 다루는 데이터 구조를 정의
 
 # 카운터를 증가시키는 노드 함수 정의
 # state : type=dict
@@ -29,9 +29,13 @@ graph.add_edge(START, "increment")
 graph.add_edge("increment", END)
 
 # 그래프 컴파일
+# 공부 자료 : https://wikidocs.net/262304
+# 1. compile() 메서드는 정의된 그래프를 실행 가능한 형태로 변환합니다.
+# 2. 이 과정에서 그래프의 구조가 검증되고, 최적화됩니다.
+# 3. 컴파일된 그래프는 app 변수에 저장되며, 이제 실행할 준비가 된 상태입니다.
 app = graph.compile()
 
 # 그래프 실행
-result = app.invoke({"counter": 0})
+result = app.invoke({"counter": 0}) # 초기 상태를 같이 전달
 print(result) # {'counter': 1}
 
