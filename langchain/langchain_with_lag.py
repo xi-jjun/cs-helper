@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # PDF_FILE_PATH = "pdf/adison_introduce.pdf"
-PDF_FILE_PATH = "pdf/daejeon.pdf"
+PDF_FILE_PATH = "../pdf/daejeon.pdf"
 
 # 1. document load
 loader = PyMuPDFLoader(PDF_FILE_PATH)

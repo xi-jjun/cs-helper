@@ -99,7 +99,7 @@ def main():
     qa_system = PDFQASystem(model_name="dolphin-llama3:8b")  # 또는 다른 Ollama 모델 사용 가능
     
     # PDF 로드
-    pdf_path = "pdf/daejeon.pdf"  # PDF 파일 경로를 지정해주세요
+    pdf_path = "../pdf/daejeon.pdf"  # PDF 파일 경로를 지정해주세요
     qa_system.load_pdf(pdf_path)
     
     # 대화형 질문-답변 루프
