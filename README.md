@@ -6,6 +6,7 @@
 - langgraph : 랭그래프 관련 연습용 코드
 - pdf : 연습용 코드 실행을 위한 샘플 PDF 파일
 - pdf_parser : PDF 파싱 연습용 코드
+- developer_news : 개발자 뉴스레터 중에서, 뉴스레터 기반의 챗봇 만들기
 
 ## 도움이 되는 Tool
 ### 1. graphviz
