@@ -12,10 +12,10 @@ OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 OPEN_AI_MODEL = os.getenv("OPEN_AI_MODEL")
 
 # 2. 기사 URL 설정
-news_url = "https://n.news.naver.com/article/011/0004481676?ntype=RANKING"
+news_urls = ("https://n.news.naver.com/article/011/0004481676?ntype=RANKING", "https://n.news.naver.com/article/055/0001255296?ntype=RANKING")
 
 # 3. 기사 내용 불러오기
-loader = WebBaseLoader(news_url)
+loader = WebBaseLoader(web_paths=news_urls)
 docs = loader.load()
 
 # 4. 텍스트 분할 (너무 길 경우 대비)
@@ -29,7 +29,7 @@ article_text = "\n\n".join([doc.page_content for doc in splitted_docs])
 prompt = PromptTemplate.from_template(
     """
 너는 뉴스 요약 전문가야. 아래는 네이버 뉴스 기사야. 
-이 기사를 **객관적이고 간결한 다섯 문장**으로 요약해 줘.
+각 링크들을 전달 줄테니 **객관적이고 간결한 다섯 문장**으로 각각 요약해 줘.
 
 조건:
 - 핵심 사실, 원인, 배경, 결과 위주로 요약할 것
