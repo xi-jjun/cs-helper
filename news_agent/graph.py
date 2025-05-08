@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph, START, END
 from typing import Literal
 
-from news_agent.nodes.input import get_user_input_from_cli
-from news_agent.schema import NewsAgentState
+from nodes.input import get_user_input_from_cli
+from schema import NewsAgentState
 
 
 # Node 정의
@@ -24,7 +24,7 @@ def search_news_articles(state: NewsAgentState):
     :return:
     """
     print("search_news_articles")
-    pass
+    return {"articles": []}
 
 
 def check_article_exist(state: NewsAgentState) -> Literal["not_existed", "existed"]:
@@ -48,7 +48,7 @@ def remove_duplicated_articles(state: NewsAgentState):
     :return:
     """
     print("remove_duplicated_articles")
-    pass
+    return {"articles": []}
 
 
 def summary_news_articles(state: NewsAgentState):
@@ -58,22 +58,21 @@ def summary_news_articles(state: NewsAgentState):
     :return:
     """
     print("summary_news_articles")
-    pass
+    return {"output": []}
 
 
-graph = StateGraph()
+graph = StateGraph(state_schema=NewsAgentState)
 # Node 정의
 graph.add_node("UserInput", get_user_input)
 graph.add_node("SearchNews", search_news_articles)
-graph.add_node("CheckSearchResult", check_article_exist)
 graph.add_node("RemoveDuplicatedNews", remove_duplicated_articles)
 graph.add_node("SummaryNews", summary_news_articles)
 
 # graph edge 정의
 graph.add_edge(START, "UserInput")
-graph.add_edge("UserInput", "CheckSearchResult")
+graph.add_edge("UserInput", "SearchNews")
 graph.add_conditional_edges(
-    "CheckSearchResult",
+    "SearchNews",
     check_article_exist,
     {
         "existed": "RemoveDuplicatedNews",
@@ -88,5 +87,10 @@ news_agent = graph.compile()
 
 # 실행
 # TODO : 테스트 용도로 일단 선언. 향후 streamlit 등으로 서비스 제공 시 수정 필요
-result = news_agent.invoke({})
+initial_state = {
+    "input": "",
+    "articles": [],
+    "output": ""
+}
+result = news_agent.invoke(initial_state)
 print(result)
