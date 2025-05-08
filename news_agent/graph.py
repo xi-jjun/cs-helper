@@ -1,3 +1,5 @@
+import datetime
+
 from langgraph.graph import StateGraph, START, END
 from typing import Literal
 
@@ -24,7 +26,12 @@ def search_news_articles(state: NewsAgentState):
     :return:
     """
     print("search_news_articles")
-    return {"articles": []}
+    # TODO : 실제 코드 작성 시 제거 요망
+    return {"articles": [{
+        "title": "hello",
+        "url": "hellp",
+        "published_at": datetime.datetime.now()
+    }]}
 
 
 def check_article_exist(state: NewsAgentState) -> Literal["not_existed", "existed"]:
@@ -48,7 +55,7 @@ def remove_duplicated_articles(state: NewsAgentState):
     :return:
     """
     print("remove_duplicated_articles")
-    return {"articles": []}
+    return {"articles": state["articles"]}
 
 
 def summary_news_articles(state: NewsAgentState):
