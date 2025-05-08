@@ -1,6 +1,10 @@
-from langgraph.graph import StateGraph, START, END
-from typing import Literal
+import os
 
+from dotenv import load_dotenv
+from langgraph.graph import StateGraph, START, END
+from typing import Literal, Optional
+
+from nodes.news_summary import NewsSummarizer, NewsArticle
 from nodes.input import get_user_input_from_cli
 from nodes.search_news import get_search_news_results
 from schema import NewsAgentState
@@ -62,7 +66,21 @@ def summary_news_articles(state: NewsAgentState):
     :return:
     """
     print("summary_news_articles")
-    return {"output": []}
+    load_dotenv()
+    summarizer = NewsSummarizer(api_key=os.environ['OPENAI_API_KEY'])
+
+    results = []
+    for article in state["articles"]:
+        news_url = article.get('url')
+        news_article = summarizer.extract_news_content(news_url)
+        summarized_content: Optional[NewsArticle] = summarizer.summarize_article(news_article)
+        results.append({
+            "title": article.get('title'),
+            "url": news_url,
+            "summarized_content": summarized_content
+        })
+
+    return {"output": results}
 
 
 graph = StateGraph(state_schema=NewsAgentState)
