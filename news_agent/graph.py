@@ -1,9 +1,8 @@
-import datetime
-
 from langgraph.graph import StateGraph, START, END
 from typing import Literal
 
 from nodes.input import get_user_input_from_cli
+from nodes.search_news import get_search_news_results
 from schema import NewsAgentState
 
 VALID_ARTICLE_COUNT = 3  # 3건 이상일 경우에만 응답해야 하는 요구사항 존재
@@ -28,12 +27,8 @@ def search_news_articles(state: NewsAgentState):
     :return:
     """
     print("search_news_articles")
-    # TODO : 실제 코드 작성 시 제거 요망
-    return {"articles": [{
-        "title": "hello",
-        "url": "hellp",
-        "published_at": datetime.datetime.now()
-    }]}
+    articles = get_search_news_results(state.get("input"))
+    return {"articles": articles}
 
 
 def check_article_exist(state: NewsAgentState) -> Literal["not_existed", "existed"]:
