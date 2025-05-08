@@ -6,6 +6,8 @@ from typing import Literal
 from nodes.input import get_user_input_from_cli
 from schema import NewsAgentState
 
+VALID_ARTICLE_COUNT = 3  # 3건 이상일 경우에만 응답해야 하는 요구사항 존재
+
 
 # Node 정의
 def get_user_input(state: NewsAgentState):
@@ -42,7 +44,7 @@ def check_article_exist(state: NewsAgentState) -> Literal["not_existed", "existe
     :param state:
     :return: 1개라도 존재할 경우 existed, 없을 경우 not_existed 반환
     """
-    if len(state["articles"]) > 0:
+    if len(state["articles"]) >= VALID_ARTICLE_COUNT:
         return "existed"
     else:
         return "not_existed"
@@ -60,7 +62,7 @@ def remove_duplicated_articles(state: NewsAgentState):
 
 def summary_news_articles(state: NewsAgentState):
     """
-    뉴스 기사 내용을 확인하여 3줄 요약
+    뉴스 기사 내용을 확인하여 3줄 요약, 최대 10개 (PoC 개념이기에, 무한정 늘어나도록 놔둘 이유가 없음)
     :param state:
     :return:
     """
