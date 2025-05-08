@@ -109,10 +109,11 @@ news_agent = graph.compile()
 
 # 실행
 # TODO : 테스트 용도로 일단 선언. 향후 streamlit 등으로 서비스 제공 시 수정 필요
-initial_state = {
-    "input": "",
-    "articles": [],
-    "output": ""
-}
-result = news_agent.invoke(initial_state)
-print(result)
+if __name__ == '__main__':
+    initial_state = {
+        "input": "",
+        "articles": [],
+        "output": ""
+    }
+    result = news_agent.invoke(initial_state)
+    print(result)
