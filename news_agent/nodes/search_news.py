@@ -4,7 +4,7 @@ from typing import List
 from dotenv import load_dotenv
 from tavily import TavilyClient
 from datetime import datetime
-from news_agent.schema import Article
+from schema import Article
 
 load_dotenv()
 
