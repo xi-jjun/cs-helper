@@ -28,11 +28,11 @@ if user_input_query := st.chat_input():
     # if not openai_api_key:
     #     st.info("OpenAI Key를 세팅해주세요!")
     #     st.stop()
-    # if not tavily_api_key:
-    #     st.info("Tavily API Key를 세팅해주세요!")
-    #     st.stop()
+    if not tavily_api_key:
+        st.info("Tavily API Key를 세팅해주세요!")
+        st.stop()
 
-    client = NewsAgent()
+    client = NewsAgent(tavily_api_key=tavily_api_key)
 
     # 유저 채팅
     st.session_state.messages.append({"role": ROLE_USER, "content": user_input_query})

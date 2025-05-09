@@ -11,8 +11,8 @@ load_dotenv()
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 
-def get_search_news_results(question: str) -> List[Article]:
-    client = TavilyClient(api_key=TAVILY_API_KEY)
+def get_search_news_results(question: str, api_key=TAVILY_API_KEY) -> List[Article]:
+    client = TavilyClient(api_key=api_key)
     response = client.search(
         query=question,
         search_depth="advanced",
