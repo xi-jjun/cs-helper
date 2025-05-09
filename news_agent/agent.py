@@ -1,6 +1,5 @@
 from langgraph.graph import StateGraph, START, END
 
-from graph import remove_duplicated_articles, check_article_exist
 from nodes.news_summary import NewsSummarizer
 from nodes.search_news import get_search_news_results
 from schema import NewsAgentState
@@ -36,6 +35,7 @@ class NewsAgent:
                 "output": [f"Error is occurred {str(e)}"]
             }
 
+    # TODO : 사실상 필요없는 노드여서 삭제 필요
     def _get_user_input(self, state: NewsAgentState):
         return {"input": state["input"]}
 
@@ -45,6 +45,18 @@ class NewsAgent:
         articles = get_search_news_results(question, api_key=self.tavily_api_key)
         # TODO : 전체 기사가 아닌 특정 몇몇 건에 대해서만 요약하도록 건수 제한 처리 추가 필요
         return {"articles": articles}
+
+    def _remove_duplicated_articles(self, state: NewsAgentState):
+        print('_remove_duplicated_articles')
+        is_existed = set()
+        result = []
+        for article in state["articles"]:
+            news_url = article["url"]
+            if news_url not in is_existed:
+                is_existed.add(news_url)
+                result.append(article)
+
+        return {"articles": result}
 
     def _summary_news_articles(self, state: NewsAgentState):
         print('_summary_news_articles')
@@ -63,11 +75,24 @@ class NewsAgent:
 
         return {"output": results}
 
+    def _check_article_exist(self, state: NewsAgentState):
+        """
+        conditional edge function
+        가져온 뉴스 기사가 3건 이상 존재하는지 확인.
+        3건 미만일 경우, 다시 검색필요.
+        :param state:
+        :return: 1개라도 존재할 경우 existed, 없을 경우 not_existed 반환
+        """
+
+        if len(state["articles"]) >= 3:
+            return "existed"
+        return "not_existed"
+
     def _setup_nodes(self):
         """노드 설정"""
         self._graph.add_node("UserInput", self._get_user_input)
         self._graph.add_node("SearchNews", self._search_news_articles)
-        self._graph.add_node("RemoveDuplicatedNews", remove_duplicated_articles)
+        self._graph.add_node("RemoveDuplicatedNews", self._remove_duplicated_articles)
         self._graph.add_node("SummaryNews", self._summary_news_articles)
 
     def _setup_edges(self):
@@ -76,7 +101,7 @@ class NewsAgent:
         self._graph.add_edge("UserInput", "SearchNews")
         self._graph.add_conditional_edges(
             "SearchNews",
-            check_article_exist,
+            self._check_article_exist,
             {
                 "existed": "RemoveDuplicatedNews",
                 "not_existed": "UserInput"
