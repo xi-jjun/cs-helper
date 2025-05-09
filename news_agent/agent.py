@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 
-from graph import remove_duplicated_articles, summary_news_articles, \
-    check_article_exist
+from graph import remove_duplicated_articles, check_article_exist
+from nodes.news_summary import NewsSummarizer
 from nodes.search_news import get_search_news_results
 from schema import NewsAgentState
 
@@ -46,12 +46,29 @@ class NewsAgent:
         # TODO : 전체 기사가 아닌 특정 몇몇 건에 대해서만 요약하도록 건수 제한 처리 추가 필요
         return {"articles": articles}
 
+    def _summary_news_articles(self, state: NewsAgentState):
+        print('_summary_news_articles')
+        summarizer = NewsSummarizer(api_key=self.openai_api_key)
+        results = []
+
+        for article in state["articles"]:
+            news_url = article.get('url')
+            news_article = summarizer.extract_news_content(news_url)
+            summarized_content = summarizer.summarize_article(news_article)
+            results.append({
+                "title": article.get('title'),
+                "url": news_url,
+                "summarized_content": summarized_content
+            })
+
+        return {"output": results}
+
     def _setup_nodes(self):
         """노드 설정"""
         self._graph.add_node("UserInput", self._get_user_input)
         self._graph.add_node("SearchNews", self._search_news_articles)
         self._graph.add_node("RemoveDuplicatedNews", remove_duplicated_articles)
-        self._graph.add_node("SummaryNews", summary_news_articles)
+        self._graph.add_node("SummaryNews", self._summary_news_articles)
 
     def _setup_edges(self):
         """엣지 설정"""

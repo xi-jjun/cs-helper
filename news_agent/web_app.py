@@ -24,15 +24,14 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 if user_input_query := st.chat_input():
-    # TODO : 향후 API KEY 를 주입 받아서 사용할 수 있도록 개선 필요
-    # if not openai_api_key:
-    #     st.info("OpenAI Key를 세팅해주세요!")
-    #     st.stop()
+    if not openai_api_key:
+        st.info("OpenAI Key를 세팅해주세요!")
+        st.stop()
     if not tavily_api_key:
         st.info("Tavily API Key를 세팅해주세요!")
         st.stop()
 
-    client = NewsAgent(tavily_api_key=tavily_api_key)
+    client = NewsAgent(tavily_api_key=tavily_api_key, openai_api_key=openai_api_key)
 
     # 유저 채팅
     st.session_state.messages.append({"role": ROLE_USER, "content": user_input_query})
