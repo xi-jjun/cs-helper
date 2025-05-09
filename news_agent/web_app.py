@@ -1,5 +1,6 @@
-from openai import OpenAI
 import streamlit as st
+
+from agent import NewsAgent
 
 ROLE_ASSISTANT = "assistant"
 ROLE_USER = "user"
@@ -23,21 +24,30 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 if user_input_query := st.chat_input():
-    if not openai_api_key:
-        st.info("OpenAI Key를 세팅해주세요!")
-        st.stop()
-    if not tavily_api_key:
-        st.info("Tavily API Key를 세팅해주세요!")
-        st.stop()
+    # TODO : 향후 API KEY 를 주입 받아서 사용할 수 있도록 개선 필요
+    # if not openai_api_key:
+    #     st.info("OpenAI Key를 세팅해주세요!")
+    #     st.stop()
+    # if not tavily_api_key:
+    #     st.info("Tavily API Key를 세팅해주세요!")
+    #     st.stop()
 
-    client = OpenAI(api_key=openai_api_key)
+    client = NewsAgent()
 
     # 유저 채팅
     st.session_state.messages.append({"role": ROLE_USER, "content": user_input_query})
     st.chat_message(ROLE_USER).write(user_input_query)
 
     # AI 채팅
-    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
-    msg = response.choices[0].message.content
+    response = client.execute(user_input_query)
+
+    msg_list = []
+    if len(response.get('output')) == 1:
+        msg = "에러 발생! 다시 시도해주세요!"
+    else:
+        for summarized_article in response.get('output'):
+            msg_list.append(
+                f"\n\n제목: {summarized_article.get('title')}\n\nurl: {summarized_article.get('url')}\n\nsummary)\n{summarized_article.get('summarized_content')}\n\n")
+        msg = "\n=================================================\n".join(msg_list)
     st.session_state.messages.append({"role": ROLE_ASSISTANT, "content": msg})
     st.chat_message(ROLE_ASSISTANT).write(msg)
