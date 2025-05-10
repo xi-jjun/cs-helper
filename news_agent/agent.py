@@ -67,6 +67,9 @@ class NewsAgent:
         for article in state["articles"]:
             news_url = article.get('url')
             news_article = summarizer.extract_news_content(news_url)
+            if news_article is None or news_article == "":
+                continue
+
             summarized_content = summarizer.summarize_article(news_article)
             results.append({
                 "title": article.get('title'),
