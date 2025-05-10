@@ -5,8 +5,9 @@ digraph NewsAgent {
     START -> SearchNews;
 
     SearchNews -> RemoveDuplicatedNews [label="existed"];
-    SearchNews -> END [label="not_existed"];
 
     RemoveDuplicatedNews -> SummaryNews;
-    SummaryNews -> END;
+    SummaryNews -> GenerateResponse;
+    SearchNews -> GenerateResponse [label="not_existed"];
+    GenerateResponse -> END;
 }

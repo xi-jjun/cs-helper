@@ -43,7 +43,7 @@ if user_input_query := st.chat_input():
 
     msg_list = []
     if len(response.get('output')) == 1:
-        msg = "에러 발생! 다시 시도해주세요!"
+        msg = response.get('output')[0]
     else:
         for summarized_article in response.get('output'):
             msg_list.append(

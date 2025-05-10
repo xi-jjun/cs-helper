@@ -90,11 +90,18 @@ class NewsAgent:
             return "existed"
         return "not_existed"
 
+    def _generate_response(self, state: NewsAgentState):
+        articles = state["articles"]
+        if len(articles) <= 0:
+            return {"output": ["결과를 찾을 수 없습니다. 다시 입력해주세요"]}
+        return state
+
     def _setup_nodes(self):
         """노드 설정"""
         self._graph.add_node("SearchNews", self._search_news_articles)
         self._graph.add_node("RemoveDuplicatedNews", self._remove_duplicated_articles)
         self._graph.add_node("SummaryNews", self._summary_news_articles)
+        self._graph.add_node("GenerateResponse", self._generate_response)
 
     def _setup_edges(self):
         """엣지 설정"""
@@ -104,11 +111,12 @@ class NewsAgent:
             self._check_article_exist,
             {
                 "existed": "RemoveDuplicatedNews",
-                "not_existed": END
+                "not_existed": "GenerateResponse"
             }
         )
         self._graph.add_edge("RemoveDuplicatedNews", "SummaryNews")
-        self._graph.add_edge("SummaryNews", END)
+        self._graph.add_edge("SummaryNews", "GenerateResponse")
+        self._graph.add_edge("GenerateResponse", END)
 
     def _build_agent(self):
         self._setup_nodes()
