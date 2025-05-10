@@ -6,9 +6,10 @@ from schema import NewsAgentState
 
 
 class NewsAgent:
-    def __init__(self, tavily_api_key="", openai_api_key=""):
+    def __init__(self, tavily_api_key="", openai_api_key="", llm_model="gpt-3.5-turbo-0125"):
         self.tavily_api_key = tavily_api_key
         self.openai_api_key = openai_api_key
+        self.llm_model = llm_model
         self.agent = None
         self.user_query = None
         self._graph = StateGraph(state_schema=NewsAgentState)
@@ -42,7 +43,8 @@ class NewsAgent:
     def _search_news_articles(self, state: NewsAgentState):
         print('_search_news_articles')
         question = state["input"]
-        searcher = NewsSearcher(tavily_api_key=self.tavily_api_key, openai_api_key=self.openai_api_key, model="gpt-4o")
+        searcher = NewsSearcher(tavily_api_key=self.tavily_api_key, openai_api_key=self.openai_api_key,
+                                model=self.llm_model)
         articles = searcher.get_news_results(question)
         # TODO : 전체 기사가 아닌 특정 몇몇 건에 대해서만 요약하도록 건수 제한 처리 추가 필요
         return {"articles": articles}
@@ -61,7 +63,7 @@ class NewsAgent:
 
     def _summary_news_articles(self, state: NewsAgentState):
         print('_summary_news_articles')
-        summarizer = NewsSummarizer(api_key=self.openai_api_key)
+        summarizer = NewsSummarizer(api_key=self.openai_api_key, llm_model=self.llm_model)
         results = []
 
         for article in state["articles"]:
