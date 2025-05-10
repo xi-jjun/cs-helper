@@ -31,8 +31,6 @@ class NewsSearcher:
 
     def _is_valid_answer(self, answer: str) -> bool:
         result = self.chain.invoke({"answer": answer})
-        print("미추겠네")
-        print(result)
         return result.content.strip() == "YES"
 
     def get_news_results(self, question: str) -> List[Article]:
@@ -44,8 +42,6 @@ class NewsSearcher:
         )
 
         answer = response.get("answer", "")
-        print("외않돼1")
-        print(answer)
         if not self._is_valid_answer(answer):
             return []
 
@@ -64,8 +60,6 @@ class NewsSearcher:
                 url=result.get("url"),
                 published_at=published_at
             ))
-        print("정신나가ㅏㅏㅏㅏㅏ")
-        print(results)
         return results
 
 
