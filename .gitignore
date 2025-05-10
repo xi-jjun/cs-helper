@@ -1,3 +1,4 @@
 .env
 .idea
 pdf/test_catalog.pdf
+__pycache__
