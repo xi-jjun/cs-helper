@@ -40,7 +40,6 @@ def get_search_news_results(question: str, api_key=TAVILY_API_KEY) -> List[Artic
         query=question,
         search_depth="advanced",
         include_answer="basic",
-        topic="news",
         exclude_domains=["youtube"]
     )
 
