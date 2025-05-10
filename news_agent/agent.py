@@ -6,9 +6,10 @@ from schema import NewsAgentState
 
 
 class NewsAgent:
-    def __init__(self, tavily_api_key="", openai_api_key=""):
+    def __init__(self, tavily_api_key="", openai_api_key="", llm_model="gpt-3.5-turbo-0125"):
         self.tavily_api_key = tavily_api_key
         self.openai_api_key = openai_api_key
+        self.llm_model = llm_model
         self.agent = None
         self.user_query = None
         self._graph = StateGraph(state_schema=NewsAgentState)
@@ -35,14 +36,11 @@ class NewsAgent:
                 "output": [f"Error is occurred {str(e)}"]
             }
 
-    # TODO : 사실상 필요없는 노드여서 삭제 필요
-    def _get_user_input(self, state: NewsAgentState):
-        return {"input": state["input"]}
-
     def _search_news_articles(self, state: NewsAgentState):
         print('_search_news_articles')
         question = state["input"]
-        searcher = NewsSearcher(tavily_api_key=self.tavily_api_key, openai_api_key=self.openai_api_key, model="gpt-4o")
+        searcher = NewsSearcher(tavily_api_key=self.tavily_api_key, openai_api_key=self.openai_api_key,
+                                model=self.llm_model)
         articles = searcher.get_news_results(question)
         # TODO : 전체 기사가 아닌 특정 몇몇 건에 대해서만 요약하도록 건수 제한 처리 추가 필요
         return {"articles": articles}
@@ -61,12 +59,15 @@ class NewsAgent:
 
     def _summary_news_articles(self, state: NewsAgentState):
         print('_summary_news_articles')
-        summarizer = NewsSummarizer(api_key=self.openai_api_key)
+        summarizer = NewsSummarizer(api_key=self.openai_api_key, llm_model=self.llm_model)
         results = []
 
         for article in state["articles"]:
             news_url = article.get('url')
             news_article = summarizer.extract_news_content(news_url)
+            if news_article is None or news_article == "":
+                continue
+
             summarized_content = summarizer.summarize_article(news_article)
             results.append({
                 "title": article.get('title'),
@@ -89,27 +90,33 @@ class NewsAgent:
             return "existed"
         return "not_existed"
 
+    def _generate_response(self, state: NewsAgentState):
+        articles = state["articles"]
+        if len(articles) <= 0:
+            return {"output": ["결과를 찾을 수 없습니다. 다시 입력해주세요"]}
+        return state
+
     def _setup_nodes(self):
         """노드 설정"""
-        self._graph.add_node("UserInput", self._get_user_input)
         self._graph.add_node("SearchNews", self._search_news_articles)
         self._graph.add_node("RemoveDuplicatedNews", self._remove_duplicated_articles)
         self._graph.add_node("SummaryNews", self._summary_news_articles)
+        self._graph.add_node("GenerateResponse", self._generate_response)
 
     def _setup_edges(self):
         """엣지 설정"""
-        self._graph.add_edge(START, "UserInput")
-        self._graph.add_edge("UserInput", "SearchNews")
+        self._graph.add_edge(START, "SearchNews")
         self._graph.add_conditional_edges(
             "SearchNews",
             self._check_article_exist,
             {
                 "existed": "RemoveDuplicatedNews",
-                "not_existed": "UserInput"
+                "not_existed": "GenerateResponse"
             }
         )
         self._graph.add_edge("RemoveDuplicatedNews", "SummaryNews")
-        self._graph.add_edge("SummaryNews", END)
+        self._graph.add_edge("SummaryNews", "GenerateResponse")
+        self._graph.add_edge("GenerateResponse", END)
 
     def _build_agent(self):
         self._setup_nodes()

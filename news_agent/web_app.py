@@ -7,6 +7,7 @@ ROLE_USER = "user"
 
 # 사이드바 메뉴
 with st.sidebar:
+    llm_model = st.text_input("LLM Model", key="llm_model")
     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
     tavily_api_key = st.text_input("Tavily API Key", key="news_article_fetching_api_key", type="password")
     "[OpenAI API Key 발급하러 가기](https://platform.openai.com/account/api-keys)"
@@ -31,7 +32,7 @@ if user_input_query := st.chat_input():
         st.info("Tavily API Key를 세팅해주세요!")
         st.stop()
 
-    client = NewsAgent(tavily_api_key=tavily_api_key, openai_api_key=openai_api_key)
+    client = NewsAgent(tavily_api_key=tavily_api_key, openai_api_key=openai_api_key, llm_model=llm_model)
 
     # 유저 채팅
     st.session_state.messages.append({"role": ROLE_USER, "content": user_input_query})
@@ -42,7 +43,7 @@ if user_input_query := st.chat_input():
 
     msg_list = []
     if len(response.get('output')) == 1:
-        msg = "에러 발생! 다시 시도해주세요!"
+        msg = response.get('output')[0]
     else:
         for summarized_article in response.get('output'):
             msg_list.append(

@@ -2,12 +2,12 @@ digraph NewsAgent {
     rankdir=LR;
     node [shape=box, style=filled, color=lightgray];
 
-    START -> UserInput;
-    UserInput -> SearchNews;
+    START -> SearchNews;
 
     SearchNews -> RemoveDuplicatedNews [label="existed"];
-    SearchNews -> UserInput [label="not_existed"];
 
     RemoveDuplicatedNews -> SummaryNews;
-    SummaryNews -> END;
+    SummaryNews -> GenerateResponse;
+    SearchNews -> GenerateResponse [label="not_existed"];
+    GenerateResponse -> END;
 }

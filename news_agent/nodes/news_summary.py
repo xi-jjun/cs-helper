@@ -66,17 +66,17 @@ class NewsSummarizer:
     def __init__(
             self,
             api_key: str,
-            model_name: str = "gpt-3.5-turbo-0125",
+            llm_model: str = "gpt-3.5-turbo-0125",
             content_extractor: Optional[NewsContentExtractor] = None
     ):
         """
         Args:
             api_key (str): OpenAI API 키
-            model_name (str): 사용할 OpenAI 모델 이름
+            llm_model (str): 사용할 OpenAI 모델 이름
             content_extractor (Optional[NewsContentExtractor]): 뉴스 본문 추출기
         """
-        self.model_name = model_name
-        self.llm = ChatOpenAI(model_name=model_name, temperature=0.5, openai_api_key=api_key)
+        self.llm_model = llm_model
+        self.llm = ChatOpenAI(model_name=llm_model, temperature=0.5, openai_api_key=api_key)
         self.content_extractor = content_extractor or Newspaper3kExtractor()
 
         # 요약을 위한 프롬프트 템플릿
