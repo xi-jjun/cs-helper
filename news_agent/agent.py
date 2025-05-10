@@ -36,10 +36,6 @@ class NewsAgent:
                 "output": [f"Error is occurred {str(e)}"]
             }
 
-    # TODO : 사실상 필요없는 노드여서 삭제 필요
-    def _get_user_input(self, state: NewsAgentState):
-        return {"input": state["input"]}
-
     def _search_news_articles(self, state: NewsAgentState):
         print('_search_news_articles')
         question = state["input"]
@@ -96,21 +92,19 @@ class NewsAgent:
 
     def _setup_nodes(self):
         """노드 설정"""
-        self._graph.add_node("UserInput", self._get_user_input)
         self._graph.add_node("SearchNews", self._search_news_articles)
         self._graph.add_node("RemoveDuplicatedNews", self._remove_duplicated_articles)
         self._graph.add_node("SummaryNews", self._summary_news_articles)
 
     def _setup_edges(self):
         """엣지 설정"""
-        self._graph.add_edge(START, "UserInput")
-        self._graph.add_edge("UserInput", "SearchNews")
+        self._graph.add_edge(START, "SearchNews")
         self._graph.add_conditional_edges(
             "SearchNews",
             self._check_article_exist,
             {
                 "existed": "RemoveDuplicatedNews",
-                "not_existed": "UserInput"
+                "not_existed": END
             }
         )
         self._graph.add_edge("RemoveDuplicatedNews", "SummaryNews")
