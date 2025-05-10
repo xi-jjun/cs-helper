@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
 from datetime import datetime
-from news_agent.schema import Article
+from schema import Article
 
 load_dotenv()
 
@@ -29,8 +29,10 @@ class NewsSearcher:
         self.llm = ChatOpenAI(api_key=openai_api_key, model=model, temperature=0)
         self.chain = self.prompt | self.llm
 
-    def _is_valid_answer(self, question: str, answer: str) -> bool:
-        result = self.chain.invoke({"question": question, "answer": answer})
+    def _is_valid_answer(self, answer: str) -> bool:
+        result = self.chain.invoke({"answer": answer})
+        print("미추겠네")
+        print(result)
         return result.content.strip() == "YES"
 
     def get_news_results(self, question: str) -> List[Article]:
@@ -38,11 +40,13 @@ class NewsSearcher:
             query=question,
             search_depth="advanced",
             include_answer="basic",
-            exclude_domains=["youtube"]
+            exclude_domains=["youtube"],
         )
 
         answer = response.get("answer", "")
-        if not self._is_valid_answer(question, answer):
+        print("외않돼1")
+        print(answer)
+        if not self._is_valid_answer(answer):
             return []
 
         results = []
@@ -52,14 +56,16 @@ class NewsSearcher:
             if published_date_str:
                 try:
                     published_at = datetime.strptime(published_date_str, '%a, %d %b %Y %H:%M:%S GMT')
-                except ValueError:
-                    pass  # 날짜 형식이 맞지 않을 경우 무시
+                except ValueError as e:
+                    print(str(e))
 
             results.append(Article(
                 title=result.get("title"),
                 url=result.get("url"),
                 published_at=published_at
             ))
+        print("정신나가ㅏㅏㅏㅏㅏ")
+        print(results)
         return results
 
 

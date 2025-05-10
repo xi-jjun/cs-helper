@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 
 from nodes.news_summary import NewsSummarizer
-from nodes.search_news import get_search_news_results
+from nodes.search_news import NewsSearcher
 from schema import NewsAgentState
 
 
@@ -42,7 +42,8 @@ class NewsAgent:
     def _search_news_articles(self, state: NewsAgentState):
         print('_search_news_articles')
         question = state["input"]
-        articles = get_search_news_results(question, api_key=self.tavily_api_key)
+        searcher = NewsSearcher(tavily_api_key=self.tavily_api_key, openai_api_key=self.openai_api_key, model="gpt-4o")
+        articles = searcher.get_news_results(question)
         # TODO : 전체 기사가 아닌 특정 몇몇 건에 대해서만 요약하도록 건수 제한 처리 추가 필요
         return {"articles": articles}
 
